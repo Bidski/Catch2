@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: BSL-1.0
 
 //  Catch v3.6.0
-//  Generated: 2024-05-05 20:53:27.562886
+//  Generated: 2024-05-07 11:38:51.376404
 //  ----------------------------------------------------------
 //  This file is an amalgamation of multiple different files.
 //  You probably shouldn't edit it directly.
@@ -8493,8 +8493,9 @@ namespace Catch {
                          m_config->verbosity());
     }
 
-    void ReporterBase::listTags(std::vector<TagInfo> const& tags) {
-        defaultListTags( m_stream, tags, m_config->hasTestFilters() );
+    void ReporterBase::listTags( std::vector<TagInfo> const& tags ) {
+        defaultListTags(
+            m_stream, tags, m_config->hasTestFilters(), m_config->verbosity() );
     }
 
 } // namespace Catch
@@ -9597,6 +9598,13 @@ namespace Catch {
             }
             out << std::flush;
         }
+        void listTagsOnly( std::ostream& out,
+                           std::vector<TagInfo> const& tags ) {
+            for ( auto const& tagCount : tags ) {
+                out << tagCount.all() << '\n';
+            }
+            out << std::flush;
+        }
     } // end unnamed namespace
 
 
@@ -9731,7 +9739,13 @@ namespace Catch {
 
     void defaultListTags( std::ostream& out,
                           std::vector<TagInfo> const& tags,
-                          bool isFiltered ) {
+                          bool isFiltered,
+                          Verbosity verbosity ) {
+        if ( verbosity == Verbosity::Quiet ) {
+            listTagsOnly( out, tags );
+            return;
+        }
+
         if ( isFiltered ) {
             out << "Tags for matching test cases:\n";
         } else {
